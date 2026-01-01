@@ -127,3 +127,70 @@ main {
   font-size: 14px;
   color: var(--muted);
 }
+
+.form-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: grid;
+  gap: 12px;
+  max-width: 520px;
+}
+
+.form-field {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.form-field input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-text {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.info-card {
+  margin-top: 16px;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  max-width: 720px;
+}
+
+.info-card h2 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.topic-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.topic-line code {
+  color: var(--fg);
+  font-size: 13px;
+  background: #fff;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}

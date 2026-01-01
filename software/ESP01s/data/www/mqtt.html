@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PD-Logger · MQTT</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <h1>PD-Logger · MQTT</h1>
+  <div class="topbar-actions">
+    <a class="btn" href="/index.html">Back</a>
+  </div>
+</header>
+
+<main>
+  <form class="form-card" id="mqtt-form">
+    <label class="form-field">
+      <span>Server</span>
+      <input id="mqtt-server" type="text" autocomplete="off" placeholder="mqtt.example.com" />
+    </label>
+    <label class="form-field">
+      <span>Port</span>
+      <input id="mqtt-port" type="number" min="1" max="65535" step="1" placeholder="1883" />
+    </label>
+    <label class="form-field">
+      <span>User</span>
+      <input id="mqtt-user" type="text" autocomplete="off" placeholder="optional" />
+    </label>
+    <label class="form-field">
+      <span>Password</span>
+      <input id="mqtt-pass" type="password" autocomplete="off" placeholder="optional" />
+    </label>
+    <div class="form-actions">
+      <button class="btn" type="submit">Save</button>
+      <span class="status-text" id="mqtt-status">—</span>
+    </div>
+  </form>
+
+  <section class="info-card" id="mqtt-topics">
+    <h2>MQTT Topics</h2>
+    <div class="topic-line">
+      <span>Chip ID</span>
+      <code id="chip-id">—</code>
+    </div>
+    <div class="topic-line">
+      <span>State</span>
+      <code id="topic-state">—</code>
+    </div>
+    <div class="topic-line">
+      <span>Availability</span>
+      <code id="topic-availability">—</code>
+    </div>
+    <div class="topic-line">
+      <span>Discovery (Voltage)</span>
+      <code id="topic-disc-voltage">—</code>
+    </div>
+    <div class="topic-line">
+      <span>Discovery (Current)</span>
+      <code id="topic-disc-current">—</code>
+    </div>
+    <div class="topic-line">
+      <span>Discovery (Power)</span>
+      <code id="topic-disc-power">—</code>
+    </div>
+  </section>
+
+  <section class="info-card" id="mqtt-log">
+    <h2>Letzte MQTT Meldung</h2>
+    <div class="topic-line">
+      <span>Status</span>
+      <code id="mqtt-last-log">—</code>
+    </div>
+  </section>
+</main>
+
+<script src="/mqtt.js"></script>
+</body>
+</html>

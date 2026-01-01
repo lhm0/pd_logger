@@ -3,6 +3,23 @@
 This repository contains two DIY gadgets to monitor and log **USB-C Power Delivery (PD)**.  
 Both devices are designed to be easy to build, hackable, and useful for makers who want to explore USB-C PD.
 
+## Update 01.01.2026: MQTT implemented
+I was asked by **@simonsayshomeassistant** whether PD Logger could be connected using MQTT. The answer was "no", but I really liked the idea and therefore implemented the MQTT feature today. 
+
+I have added a MQTT button to the web interface:
+
+<img src="images/control_page.jpg" alt="DIY Power Meter" width="800"/>
+
+It starts the MQTT configuration page, which looks like this:
+
+<img src="images/MQTT_page.jpg" alt="DIY Power Meter" width="800"/>
+
+Please note: I have tested MQTT with test.mosquitto.org and with a local mosquitto server. From what I see, **it all works fine.**
+However, I have **not** tested with home assistant, simply because I do not have home assistant and know just little about it. 
+Please provide feedback!
+
+Best regards, Ludwin
+
 ---
 
 ## ✨ Features

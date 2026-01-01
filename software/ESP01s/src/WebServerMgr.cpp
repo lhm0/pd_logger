@@ -1,5 +1,9 @@
 #include "WebServerMgr.h"
 #include <time.h> 
+#include <ESP8266WiFi.h>
+#include "MqttClientMgr.h"
+
+static const char* kMqttConfigPath = "/mqtt.json";
 
 static String getParam(ESP8266WebServer& srv, const String& name) {
   if (!srv.hasArg(name)) return String();
@@ -30,11 +34,14 @@ void WebServerMgr::serveStaticFiles() {
   _server.serveStatic("/graphics.html", LittleFS, "/www/graphics.html");
   _server.serveStatic("/graphics.js",   LittleFS, "/www/graphics.js");
   _server.serveStatic("/graphics.css",  LittleFS, "/www/graphics.css"); 
+  _server.serveStatic("/mqtt.html",     LittleFS, "/www/mqtt.html");
+  _server.serveStatic("/mqtt.js",       LittleFS, "/www/mqtt.js");
 }
 
-void WebServerMgr::begin(const Measurement* latest, DataLogger* logger) {
+void WebServerMgr::begin(const Measurement* latest, DataLogger* logger, MqttClientMgr* mqtt) {
   _latest = latest;
   _logger = logger;
+  _mqtt = mqtt;
 
   // --- Statische Dateien explizit registrieren ---
   serveStaticFiles();
@@ -47,6 +54,10 @@ void WebServerMgr::begin(const Measurement* latest, DataLogger* logger) {
   _server.on("/api/logs/download_all", HTTP_GET, [this]() { handleLogsDownloadAll(); });
   _server.on("/api/logs/range", HTTP_GET, [this]() { handleLogsRange(); }); // für Grafikseite
   _server.on("/api/logs/clear", HTTP_POST, [this]() { handleLogsClear(); });
+  _server.on("/api/mqtt/config", HTTP_GET, [this]() { handleMqttGet(); });
+  _server.on("/api/mqtt/config", HTTP_POST, [this]() { handleMqttSave(); });
+  _server.on("/api/device/info", HTTP_GET, [this]() { handleDeviceInfo(); });
+  _server.on("/api/mqtt/status", HTTP_GET, [this]() { handleMqttStatus(); });
 
   _server.onNotFound([this]() {
     _server.send(404, "application/json", "{\"error\":\"not found\"}");
@@ -394,4 +405,95 @@ void WebServerMgr::handleLogsClear() {
   } else {
     _server.send(500, "application/json", "{\"ok\":false,\"error\":\"clear failed\"}");
   }
+}
+
+void WebServerMgr::handleMqttGet() {
+  StaticJsonDocument<256> doc;
+  doc["server"] = "";
+  doc["port"] = 1883;
+  doc["user"] = "";
+  doc["pass"] = "";
+
+  if (LittleFS.exists(kMqttConfigPath)) {
+    File f = LittleFS.open(kMqttConfigPath, "r");
+    if (!f) {
+      _server.send(500, "application/json", "{\"error\":\"mqtt config open failed\"}");
+      return;
+    }
+    DeserializationError err = deserializeJson(doc, f);
+    f.close();
+    if (err) {
+      doc.clear();
+      doc["server"] = "";
+      doc["port"] = 1883;
+    }
+  } else {
+    File f = LittleFS.open(kMqttConfigPath, "w");
+    if (f) {
+      serializeJson(doc, f);
+      f.close();
+    }
+  }
+
+  String out;
+  serializeJson(doc, out);
+  _server.send(200, "application/json", out);
+}
+
+void WebServerMgr::handleMqttSave() {
+  const String body = _server.arg("plain");
+  if (body.length() == 0) {
+    _server.send(400, "application/json", "{\"ok\":false,\"error\":\"empty body\"}");
+    return;
+  }
+
+  StaticJsonDocument<256> inDoc;
+  DeserializationError err = deserializeJson(inDoc, body);
+  if (err) {
+    _server.send(400, "application/json", "{\"ok\":false,\"error\":\"bad json\"}");
+    return;
+  }
+
+  const char* server = inDoc["server"] | "";
+  int port = inDoc["port"] | 0;
+  const char* user = inDoc["user"] | "";
+  const char* pass = inDoc["pass"] | "";
+  if (port <= 0 || port > 65535) {
+    _server.send(400, "application/json", "{\"ok\":false,\"error\":\"bad port\"}");
+    return;
+  }
+
+  StaticJsonDocument<256> outDoc;
+  outDoc["server"] = server;
+  outDoc["port"] = port;
+  outDoc["user"] = user;
+  outDoc["pass"] = pass;
+
+  File f = LittleFS.open(kMqttConfigPath, "w");
+  if (!f) {
+    _server.send(500, "application/json", "{\"ok\":false,\"error\":\"save failed\"}");
+    return;
+  }
+  serializeJson(outDoc, f);
+  f.close();
+  _server.send(200, "application/json", "{\"ok\":true}");
+}
+
+void WebServerMgr::handleDeviceInfo() {
+  char buf[9];
+  snprintf(buf, sizeof(buf), "%06X", ESP.getChipId());
+
+  StaticJsonDocument<128> doc;
+  doc["chipId"] = buf;
+  String out;
+  serializeJson(doc, out);
+  _server.send(200, "application/json", out);
+}
+
+void WebServerMgr::handleMqttStatus() {
+  StaticJsonDocument<256> doc;
+  doc["message"] = (_mqtt ? _mqtt->lastLog() : "");
+  String out;
+  serializeJson(doc, out);
+  _server.send(200, "application/json", out);
 }

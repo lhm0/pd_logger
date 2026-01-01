@@ -12,11 +12,13 @@
 #include "TimeService.h"
 #include "DataLogger.h"
 #include "WebServerMgr.h"
+#include "MqttClientMgr.h"
 
 SensorINA219 sensor;
 TimeService   timeSvc;
 DataLogger    logger;
 WebServerMgr  web(80);
+MqttClientMgr mqtt;
 
 Measurement latest;
 unsigned long lastSample = 0;
@@ -91,13 +93,15 @@ void setup() {
     Serial.println(logger.currentFilePath());
   }
 
-  web.begin(&latest, &logger);
+  web.begin(&latest, &logger, &mqtt);
+  mqtt.begin(&latest);
 
   lastSample = millis();
 }
 
 void loop() {
   web.loop();
+  mqtt.loop();
 
   // mDNS needs regular updates
   MDNS.update();

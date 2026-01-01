@@ -5,18 +5,20 @@
 #include <ArduinoJson.h>
 #include "Measurement.h"
 #include "DataLogger.h"
+class MqttClientMgr;
 
 class WebServerMgr {
 public:
   explicit WebServerMgr(uint16_t port = 80) : _server(port) {}
 
-  void begin(const Measurement* latest, DataLogger* logger);
+  void begin(const Measurement* latest, DataLogger* logger, MqttClientMgr* mqtt);
   void loop();
 
 private:
   ESP8266WebServer _server;
   const Measurement* _latest = nullptr;
   DataLogger* _logger = nullptr;
+  MqttClientMgr* _mqtt = nullptr;
 
   void handleHealth();
   void handleLatest();
@@ -26,4 +28,8 @@ private:
   void handleLogsRange();
   void serveStaticFiles();
   void handleLogsClear();
+  void handleMqttGet();
+  void handleMqttSave();
+  void handleDeviceInfo();
+  void handleMqttStatus();
 };
