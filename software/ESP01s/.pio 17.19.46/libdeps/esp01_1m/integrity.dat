@@ -1,0 +1,3 @@
+tzapu/WiFiManager @ ^2.0.17
+adafruit/Adafruit INA219 @ ^1.2.3
+bblanchon/ArduinoJson @ ^6.21.5
